@@ -1,0 +1,50 @@
+{
+  "name": "covid19",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.11.9",
+    "@testing-library/react": "^11.2.5",
+    "@testing-library/user-event": "^12.6.3",
+    "axios": "^0.21.1",
+    "body-parser": "^1.19.0",
+    "chart.js": "^2.9.4",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-scripts": "4.0.2",
+    "request": "^2.88.2",
+    "scriptjs": "^2.5.9",
+    "serve-static": "^1.14.1",
+    "web-vitals": "^1.1.0",
+    "xml-js": "^1.6.11"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "homepage": "./",
+  "proxy": "http://localhost:9080/"
+}
