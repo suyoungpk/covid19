@@ -1,0 +1,63 @@
+
+  @charset "utf-8";
+
+/* noto-sans-regular - latin */
+@font-face {
+	font-family: 'Noto Sans';
+	font-style: normal;
+	font-weight: 400;
+	src: url('./noto-sans-v11-latin-regular.eot'); /* IE9 Compat Modes */
+	src: local(''),
+		 url('./noto-sans-v11-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+		 url('./noto-sans-v11-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+		 url('./noto-sans-v11-latin-regular.woff') format('woff'), /* Modern Browsers */
+		 url('./noto-sans-v11-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+		 url('./noto-sans-v11-latin-regular.svg#NotoSans') format('svg'); /* Legacy iOS */
+  }
+  /* noto-sans-700 - latin */
+  @font-face {
+	font-family: 'Noto Sans';
+	font-style: normal;
+	font-weight: 700;
+	src: url('./noto-sans-v11-latin-700.eot'); /* IE9 Compat Modes */
+	src: local(''),
+		 url('./noto-sans-v11-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+		 url('./noto-sans-v11-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
+		 url('./noto-sans-v11-latin-700.woff') format('woff'), /* Modern Browsers */
+		 url('./noto-sans-v11-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
+		 url('./noto-sans-v11-latin-700.svg#NotoSans') format('svg'); /* Legacy iOS */
+  }
+  /* 웹폰트 Notosans cjk*/
+@font-face {
+    font-family: 'NotoSansKR';
+    font-weight: 700;
+    src: local('NotoSansKR-Bold'),
+    url(./NotoSansKr-Bold.eot) format('eot'),
+    url(./NotoSansKr-Bold.woff) format('woff'),
+    url(./NotoSansKr-Bold.otf) format('opentype');
+}
+@font-face {
+    font-family: 'NotoSansKR';
+    font-weight: 500;
+    src: local('NotoSansKR-Medium'),
+    url(./NotoSansKR-Medium.eot) format('eot'),
+    url(./NotoSansKR-Medium.woff) format('woff'),
+    url(./NotoSansKR-Medium.otf) format('opentype');
+}
+
+@font-face {
+    font-family: 'NotoSansKR';
+    font-weight:normal;
+    src: local('NotoSansKR-Regular'),
+    url(./NotoSansKR-Regular.eot) format('eot'),
+    url(./NotoSansKR-Regular.woff) format('woff'),
+    url(./NotoSansKR-Regular.otf) format('opentype');
+}
+@font-face {
+    font-family: 'NotoSansKR';
+    font-weight: 300;
+    src: local('NotoSansKR-Light'),
+    url(./NotoSansKR-Light.eot) format('eot'),
+    url(./NotoSansKR-Light.woff) format('woff'),
+    url(./NotoSansKR-Light.otf) format('opentype');
+}
