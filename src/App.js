@@ -68,17 +68,17 @@ function App() {
         content: {
           title: '코로나 바이러스 확진 현황',
           description: '#코로나 #확진자수',
-          imageUrl: process.env.FETCH_URL+'/assets/images/scan.jpg', 
+          imageUrl: process.env.REACT_FETCH_URL+'/assets/images/scan.jpg', 
           link: {
             mobileWebUrl: window.location.href,
             webUrl: window.location.href,
           },
         },
-        social: {
-          likeCount: 77,
-          commentCount: 55,
-          sharedCount: 333,
-        },
+        // social: {
+        //   likeCount: 77,
+        //   commentCount: 55,
+        //   sharedCount: 333,
+        // },
         buttons: [
           {
             title: '웹으로 보기',
