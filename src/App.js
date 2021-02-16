@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Chart from 'chart.js';
 import axios from 'axios';
 import './assets/css/covid19.css';
+import xlsx from 'xlsx';
 
 import svgData from './svgData.json'
 function App() {
@@ -12,6 +13,8 @@ function App() {
   let [items,setItems] = useState([]);
   let [todayData,setTodayData] = useState({});
   let [todayData2,setTodayData2] = useState({});
+  let [articles,setArticles] = useState([]);
+  let [excelData,setExcelData] = useState([]);
   const chartRef = useRef(null);  
  
   const {t, i18n } = useTranslation();
@@ -30,11 +33,88 @@ function App() {
   function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
+  let cnt = 1;
+  const  getNews = async () => {
+    cnt++;
+    await axios.post('/news',{
+        params:{
+          page:cnt
+        }
+      }).then(res => {
+        setArticles(articles.concat(res.data));
+       // console.log(articles.length);
+      });
+  }
+  const excelDownload = ()=>{
+    console.log(excelData);
+    const ws = xlsx.utils.json_to_sheet(excelData);
+    const wb = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(wb, ws, "Sheet1");
+    xlsx.writeFile(wb, "Test.xlsx");
+  }
+  const createKakaoButton = () => {
+    // kakao sdk script이 정상적으로 불러와졌으면 window.Kakao로 접근이 가능합니다
+    if (window.Kakao) {
+      const kakao = window.Kakao
+      // 중복 initialization 방지
+      if (!kakao.isInitialized()) {
+        // 두번째 step 에서 가져온 javascript key 를 이용하여 initialize
+        kakao.init(process.env.REACT_APP_KAKAO_KEY)
+      }
+      kakao.Link.createDefaultButton({
+        // Render 부분 id=kakao-link-btn 을 찾아 그부분에 렌더링을 합니다
+        container: '#kakao-link-btn',
+        objectType: 'feed',
+        content: {
+          title: '코로나 바이러스 확진 현황',
+          description: '#코로나 #확진자수',
+          imageUrl: process.env.FETCH_URL+'/assets/images/scan.jpg', 
+          link: {
+            mobileWebUrl: window.location.href,
+            webUrl: window.location.href,
+          },
+        },
+        social: {
+          likeCount: 77,
+          commentCount: 55,
+          sharedCount: 333,
+        },
+        buttons: [
+          {
+            title: '웹으로 보기',
+            link: {
+              mobileWebUrl: window.location.href,
+              webUrl: window.location.href,
+            },
+          },
+          {
+            title: '앱으로 보기',
+            link: {
+              mobileWebUrl: window.location.href,
+              webUrl: window.location.href,
+            },
+          },
+        ],
+      })
+    }
+  }
   useEffect(() => {
+     
+        // const kakaoshare = async ()=>{
+        //   const script = document.createElement('script')
+        //   script.src = ''
+        //   script.async = true
+        //   document.body.appendChild(script)
+          
+        //   return () => {
+        //     document.body.removeChild(script)
+        //   }
+        // }
         let selectBoxs = document.querySelectorAll('.select-box');
         selectBoxs.forEach(e => {
           selectbox(e.querySelector('select'));
         });
+      
         const drawChart = ()=>{
           const ctx = chartRef.current.getContext('2d');
           new Chart(ctx, {
@@ -51,7 +131,8 @@ function App() {
                   }]
               },
               options: {
-                legend: {
+                  onHover:false,
+                  legend: {
                       display: false
                   },
                   scales: {
@@ -60,6 +141,32 @@ function App() {
                               beginAtZero: true
                           }
                       }]
+                  },
+                  animation: {
+                    onComplete: function() {
+                      const chartInstance = this.chart,
+                        ctx = chartInstance.ctx;
+     
+                      ctx.font = Chart.helpers.fontString(
+                        12,
+                        Chart.defaults.global.defaultFontStyle,
+                        Chart.defaults.global.defaultFontFamily
+                      );
+                      ctx.textAlign = "center";
+                      ctx.textBaseline = "bottom";
+     
+                      this.data.datasets.forEach(function(dataset, i) {
+                        const meta = chartInstance.controller.getDatasetMeta(i);
+                        meta.data.forEach(function(bar, index) {
+                          const data = dataset.data[index];
+                          ctx.fillStyle = 'rgba(255, 99, 132, 1)';
+                          ctx.fillText(data, bar._model.x, bar._model.y - 2);
+                        });
+                      });
+                    }
+                  },
+                  tooltips: {
+                    enabled: false
                   }
               }
           });
@@ -74,23 +181,24 @@ function App() {
                     date:yyyy+"/"+ mm + "/"+dd
                   }
                 }).then(res => {
-                  let {item} = res.data.response.body.items;
+                  let {item} = res.data.items;
                   let list = item;
+               //   console.log(list);
                   let  todayData = list[0],// 오늘날짜 데이터 
                   yesterdayData = list[1]; // 어제날짜 데이터 
                   // console.log(list[0]);
-                  let updated = todayData.createDt._text.split(' ');
+                  let updated = todayData.createDt.split(' ');
                   updated[1] = updated[1].substring(0,5); 
                   setTodayData({
                    updateTime:updated[0]+' '+updated[1],
-                    decide : numberWithCommas(todayData.decideCnt._text),
-                    clear : numberWithCommas(todayData.clearCnt._text),
-                    death : numberWithCommas(todayData.deathCnt._text),
-                    exam : numberWithCommas(todayData.examCnt._text),
-                    decide_ :  parseInt(todayData.decideCnt._text) - parseInt(yesterdayData.decideCnt._text),
-                    clear_ :  parseInt(todayData.clearCnt._text) - parseInt(yesterdayData.clearCnt._text),
-                    death_ :  parseInt(todayData.deathCnt._text) - parseInt(yesterdayData.deathCnt._text),
-                    exam_ :  parseInt(todayData.examCnt._text) - parseInt(yesterdayData.examCnt._text)
+                    decide : numberWithCommas(todayData.decideCnt),
+                    clear : numberWithCommas(todayData.clearCnt),
+                    death : numberWithCommas(todayData.deathCnt),
+                    exam : numberWithCommas(todayData.examCnt),
+                    decide_ :  parseInt(todayData.decideCnt) - parseInt(yesterdayData.decideCnt),
+                    clear_ :  parseInt(todayData.clearCnt) - parseInt(yesterdayData.clearCnt),
+                    death_ :  parseInt(todayData.deathCnt) - parseInt(yesterdayData.deathCnt),
+                    exam_ :  parseInt(todayData.examCnt) - parseInt(yesterdayData.examCnt)
                   });
                  today.setDate(today.getDate()-5); // 5일전으로 셋팅
                   for(let i = 0;i<5;i++){
@@ -102,15 +210,15 @@ function App() {
                       titles.push(day);
                       let str = yyyy+mm+dd;
                       for(let j = 0;j < list.length;j++){
-                          if(list[j].stateDt._text == str) {
-                              let cha =  parseInt(list[j].decideCnt._text) -  parseInt(list[j+1].decideCnt._text);
+                          if(list[j].stateDt == str) {
+                              let cha =  parseInt(list[j].decideCnt) -  parseInt(list[j+1].decideCnt);
                               if(cha < 0) cha = 0;
                               items.push(cha);
                           };
                       }
                   }
                   
-                   drawChart();
+                  drawChart();
                 });
                 let res2 = await axios.post('/api2',{
                   params:{
@@ -118,7 +226,7 @@ function App() {
                   }
                 }).then(res => {
                   let {item} = res.data.response.body.items;
-                   console.log(item);
+                  //  console.log(item);
                   // document.querySelector("#incheon").innerHTML = svgData[0].svg;
                   let updated = item[0].createDt._text.split(' ');
                   updated[1] = updated[1].substring(0,5); 
@@ -135,7 +243,11 @@ function App() {
                           if(cnt > 20) statusClass = "step2";
                           if(cnt > 50) statusClass = "step3";
                           if(cnt > 100) statusClass = "step4";
-                          
+                          excelData.push({
+                            local:item[j].gubun._text,
+                            total:numberWithCommas(item[j].defCnt._text),
+                            today:item[j].incDec._text
+                          })
                           let temp = `<div class="area ${svgData[i].name} ${statusClass}">
                                         <a href="${svgData[i].href}" target="_blank">
                                           <p class="local">${t(svgData[i].name)}</p>
@@ -151,20 +263,27 @@ function App() {
                         }
                       }
                    }
+                   setExcelData(excelData);
                   
                 });
+                
+                
               }catch(e){
                 console.log('error:'+e);
               }
 
-
+              
           };
-          fetchData();
+        fetchData();
+        getNews();
+        // kakaoshare();
+        createKakaoButton();
    }, []);
   return (
    <div>
      <Meta data = {metaData}/>
      <section className="wrapper">
+       
         <div className="title-area">
           <div className="inner-wrapper">
             <div className="select-box">
@@ -177,8 +296,8 @@ function App() {
             <h1>{t('covid')}</h1>
             <p className="time">{todayData.updateTime} {t('standard')}</p>
             <div className="fixed">
-              <button className="btn btn-excel" type="button">{t('excel')}</button>
-              <button className="btn btn-kakao" type="button">{t('kakao')}</button>
+              <button className="btn btn-excel" type="button" onClick={excelDownload}>{t('excel')}</button>
+              <button className="btn btn-kakao" type="button" id="kakao-link-btn">{t('kakao')}</button>
             </div>
           </div>
         </div>
@@ -192,7 +311,7 @@ function App() {
                   "today " +
                   (todayData.decide_ > 0? 'up' : '') +
                   (todayData.decide_ < 0? 'down' : '')
-                }>{Math.abs(todayData.decide_)}</p>
+                }>{numberWithCommas(Math.abs(todayData.decide_))}</p>
               </li>
               <li>
                 <h2>{t('recovered')}</h2>
@@ -201,7 +320,7 @@ function App() {
                   "today " +
                   (todayData.clear_ > 0? 'up' : '') +
                   (todayData.clear_ < 0? 'down' : '')
-                }>{Math.abs(todayData.clear_)}</p>
+                }>{numberWithCommas(Math.abs(todayData.clear_))}</p>
               </li>
               <li>
                 <h2>{t('deaths')}</h2>
@@ -210,7 +329,7 @@ function App() {
                   "today " +
                   (todayData.death_ > 0? 'up' : '') +
                   (todayData.death_ < 0? 'down' : '')
-                }>{Math.abs(todayData.death_)}</p>
+                }>{numberWithCommas(Math.abs(todayData.death_))}</p>
               </li>
               <li>
                 <h2>{t('exam')}</h2>
@@ -219,7 +338,7 @@ function App() {
                   "today " +
                   (todayData.exam_ > 0? 'up' : '') +
                   (todayData.exam_ < 0? 'down' : '')
-                }>{Math.abs(todayData.exam_)}</p>
+                }>{numberWithCommas(Math.abs(todayData.exam_))}</p>
               </li>
             </ul>
           </article>
@@ -230,55 +349,27 @@ function App() {
             </div>
           </article>
           <article className="card">
-            <h2>{t('local active cases')} <span>{setTodayData2.updateTime} {t('standard')}</span></h2>
+            <h2>{t('local active cases')} <span>{todayData2.updateTime} {t('standard')}</span></h2>
             <div className="map"></div>
           </article>
           <article className="card news">
             <h2 className="hidden">{t('news')}</h2>
             <ul>
-              <li>
-                <a href="#" target="_blank" title="새창">
-                  <p className="info"><span className="time">36분전</span><span className="press">연합뉴스</span></p>
-                  <p className="title">
-                    가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차
-                  </p>
-                </a>
-              </li>
-              <li>
-                <a href="#" target="_blank" title="새창">
-                  <p className="info"><span className="time">36분전</span><span className="press">연합뉴스</span></p>
-                  <p className="title">
-                    가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차
-                  </p>
-                </a>
-              </li>
-              <li>
-                <a href="#" target="_blank" title="새창">
-                  <p className="info"><span className="time">36분전</span><span className="press">연합뉴스</span></p>
-                  <p className="title">
-                    가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차
-                  </p>
-                </a>
-              </li>
-              <li>
-                <a href="#" target="_blank" title="새창">
-                  <p className="info"><span className="time">36분전</span><span className="press">연합뉴스</span></p>
-                  <p className="title">
-                    가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차
-                  </p>
-                </a>
-              </li>
-              <li>
-                <a href="#" target="_blank" title="새창">
-                  <p className="info"><span className="time">36분전</span><span className="press">연합뉴스</span></p>
-                  <p className="title">
-                    가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차가나다라마바사아자차
-                  </p>
-                </a>
-              </li>
+              {
+                articles.map((e,i)=>{
+                  return (
+                    <li>
+                      <a href={e.url} target="_blank" title="새창">
+                        <p className="info"><span className="time">{e.date}</span><span className="press">{e.press}</span></p>
+                        <p className="title">{e.title}</p>
+                      </a>
+                    </li>
+                  );
+                })
+              }
             </ul>
             <div className="btn-area">
-              <button className="btn btn-more" type="button">
+              <button className="btn btn-more" type="button" onClick={getNews}>
               {t('more')}
               </button>
             </div>
