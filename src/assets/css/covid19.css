@@ -83,7 +83,9 @@ body{background:#f5f6f8}
 .btn-kakao::before{background: url(../images/ico-kakao.png)}
 
 @media screen and (max-width:640px) {
+    .wrapper{padding: 0 0 10px}
     .inner-wrapper{margin:0 10px}
+    .title-area{padding:30px 0 60px}
     .title-area h1{font-size:16px}
     .title-area .time{font-size:13px}
     .card h2{font-size:16px}
@@ -93,4 +95,5 @@ body{background:#f5f6f8}
     .news li .info {font-size:11px;}
     .news li .title{font-size:13px}
     .btn-more{font-size:12px;}
+    .chart-card .chart{width:calc(100% + 40px);position:relative;left:-20px}
 }

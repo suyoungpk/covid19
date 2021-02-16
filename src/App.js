@@ -20,7 +20,9 @@ function App() {
   const {t, i18n } = useTranslation();
   const changelanguage = (e)=>{
     //console.log(e.target.value);
-    i18n.changeLanguage(e.target.value);
+    i18n.changeLanguage(e.target.value).then(()=>{
+      changeLocalName();
+    });
   };
   const metaData = {
       title:t('meta-title'),
@@ -68,7 +70,7 @@ function App() {
         content: {
           title: '코로나 바이러스 확진 현황',
           description: '#코로나 #확진자수',
-          imageUrl: process.env.REACT_FETCH_URL+'/assets/images/scan.jpg', 
+          imageUrl: process.env.REACT_FETCH_URL+require('./assets/images/scan.jpg'), 
           link: {
             mobileWebUrl: window.location.href,
             webUrl: window.location.href,
@@ -86,30 +88,26 @@ function App() {
               mobileWebUrl: window.location.href,
               webUrl: window.location.href,
             },
-          },
-          {
-            title: '앱으로 보기',
-            link: {
-              mobileWebUrl: window.location.href,
-              webUrl: window.location.href,
-            },
-          },
+          }
+          // {
+          //   title: '앱으로 보기',
+          //   link: {
+          //     mobileWebUrl: window.location.href,
+          //     webUrl: window.location.href,
+          //   },
+          // },
         ],
       })
     }
   }
+  const changeLocalName = ()=>{
+    let names = document.querySelectorAll('.map .area .local');
+    names.forEach(e=>{
+      e.innerHTML = t(e.dataset.name);
+    });
+  }
   useEffect(() => {
-     
-        // const kakaoshare = async ()=>{
-        //   const script = document.createElement('script')
-        //   script.src = ''
-        //   script.async = true
-        //   document.body.appendChild(script)
-          
-        //   return () => {
-        //     document.body.removeChild(script)
-        //   }
-        // }
+    
         let selectBoxs = document.querySelectorAll('.select-box');
         selectBoxs.forEach(e => {
           selectbox(e.querySelector('select'));
@@ -171,6 +169,7 @@ function App() {
               }
           });
         }
+        
         const fetchData = async ()=>{
               let dd = String(today.getDate()).padStart(2, '0'),
                   mm = String(today.getMonth() + 1).padStart(2, '0'),
@@ -248,9 +247,10 @@ function App() {
                             total:numberWithCommas(item[j].defCnt._text),
                             today:item[j].incDec._text
                           })
+                          
                           let temp = `<div class="area ${svgData[i].name} ${statusClass}">
                                         <a href="${svgData[i].href}" target="_blank">
-                                          <p class="local">${t(svgData[i].name)}</p>
+                                          <p class="local" data-name='${svgData[i].name}'>${t(svgData[i].name)}</p>
                                           <p class="total">${ numberWithCommas(item[j].defCnt._text)}</p>
                                           <p class="today ${iconClass}">${item[j].incDec._text}</p>
                                         </a>
@@ -264,7 +264,6 @@ function App() {
                       }
                    }
                    setExcelData(excelData);
-                  
                 });
                 
                 
@@ -342,7 +341,7 @@ function App() {
               </li>
             </ul>
           </article>
-          <article className="card">
+          <article className="card chart-card">
             <h2>{t('active cases graph')}</h2>
             <div className="chart">
               <canvas id="myChart" ref ={chartRef} width={400} height={400} />
