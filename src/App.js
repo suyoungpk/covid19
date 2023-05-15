@@ -165,7 +165,12 @@ function App() {
                   },
                   tooltips: {
                     enabled: false
-                  }
+                  },
+                  layout: {
+                    padding: {
+                      top: 80,
+                    },
+                  },
               }
           });
         }
@@ -180,42 +185,48 @@ function App() {
                     date:yyyy+"/"+ mm + "/"+dd
                   }
                 }).then(res => {
-                  let {item} = res.data.items;
-                  let list = item;
+                  
+                 //let {item} = res.data.items;
+                  
+                  // let list = ;
                //   console.log(list);
-                  let  todayData = list[0],// 오늘날짜 데이터 
-                  yesterdayData = list[1]; // 어제날짜 데이터 
+                  let  dailyData = res.data[0];// 오늘날짜 데이터 
+                  console.log(dailyData);
+                  //yesterdayData = list[1]; // 어제날짜 데이터 
                   // console.log(list[0]);
-                  let updated = todayData.createDt.split(' ');
-                  updated[1] = updated[1].substring(0,5); 
+                  let updated = dailyData.mmddhh.split('.');
                   setTodayData({
-                   updateTime:updated[0]+' '+updated[1],
-                    decide : numberWithCommas(todayData.decideCnt),
-                    clear : numberWithCommas(todayData.clearCnt),
-                    death : numberWithCommas(todayData.deathCnt),
-                    exam : numberWithCommas(todayData.examCnt),
-                    decide_ :  parseInt(todayData.decideCnt) - parseInt(yesterdayData.decideCnt),
-                    clear_ :  parseInt(todayData.clearCnt) - parseInt(yesterdayData.clearCnt),
-                    death_ :  parseInt(todayData.deathCnt) - parseInt(yesterdayData.deathCnt),
-                    exam_ :  parseInt(todayData.examCnt) - parseInt(yesterdayData.examCnt)
+                   updateTime:updated[0]+'/'+updated[1],
+                    decide : numberWithCommas(parseInt(dailyData.cnt_confirmations)), // 확진자수
+                    // clear : numberWithCommas(todayData.clearCnt), // 격리해제
+                    death : numberWithCommas(parseInt(dailyData.cnt_deaths)), // 사망자수
+                    // exam : numberWithCommas(todayData.examCnt),// 검사수
+                    decide_ :  parseInt(dailyData.cnt_deaths),// - parseInt(yesterdayData.decideCnt),
+                    // clear_ :  parseInt(todayData.clearCnt) - parseInt(yesterdayData.clearCnt),
+                    death_ :  parseInt(dailyData.cnt_confirmations)// - parseInt(yesterdayData.deathCnt),
+                    // exam_ :  parseInt(todayData.examCnt) - parseInt(yesterdayData.examCnt)
                   });
-                 today.setDate(today.getDate()-5); // 5일전으로 셋팅
-                  for(let i = 0;i<5;i++){
-                      today.setDate(today.getDate() + 1);
-                      let dd = String(today.getDate()).padStart(2, '0'),
-                          mm = String(today.getMonth() + 1).padStart(2, '0'),
-                          yyyy = today.getFullYear();
-                      let day  = yyyy+'/'+ mm +'/'+ dd;
-                      titles.push(day);
-                      let str = yyyy+mm+dd;
-                      for(let j = 0;j < list.length;j++){
-                          if(list[j].stateDt == str) {
-                              let cha =  parseInt(list[j].decideCnt) -  parseInt(list[j+1].decideCnt);
-                              if(cha < 0) cha = 0;
-                              items.push(cha);
-                          };
-                      }
-                  }
+                  titles.push(yyyy+"/"+ mm + "/"+(dd-1));
+                  titles.push(yyyy+"/"+ mm + "/"+dd);
+                  items.push(0);
+                  items.push(parseInt(dailyData.cnt_confirmations));
+                //  today.setDate(today.getDate()-5); // 5일전으로 셋팅
+                //   for(let i = 0;i<5;i++){
+                //       today.setDate(today.getDate() + 1);
+                //       let dd = String(today.getDate()).padStart(2, '0'),
+                //           mm = String(today.getMonth() + 1).padStart(2, '0'),
+                //           yyyy = today.getFullYear();
+                //       let day  = yyyy+'/'+ mm +'/'+ dd;
+                //       titles.push(day);
+                //       let str = yyyy+mm+dd;
+                //       for(let j = 0;j < list.length;j++){
+                //           if(list[j].stateDt == str) {
+                //               let cha =  parseInt(list[j].decideCnt) -  parseInt(list[j+1].decideCnt);
+                //               if(cha < 0) cha = 0;
+                //               items.push(cha);
+                //           };
+                //       }
+                //   }
                   
                   drawChart();
                 });
@@ -225,23 +236,23 @@ function App() {
                   }
                 }).then(res => {
                   let {item} = res.data.response.body.items;
-                  //  console.log(item);
+                  console.log(item);
                   // document.querySelector("#incheon").innerHTML = svgData[0].svg;
-                  let updated = item[0].createDt._text.split(' ');
-                  updated[1] = updated[1].substring(0,5); 
-                  setTodayData2({
-                   updateTime:updated[0]+' '+updated[1]
-                  });
+                  //let updated = item[0].stdDay._text.split('-');
+                 // updated[1] = updated[1].substring(0,5); 
+                  // setTodayData2({
+                  //  updateTime:updated[0]+' '+updated[1]
+                  // });
                   for(let i=0;i<svgData.length;i++){
                     for(let j=0;j<item.length;j++){
                       if(svgData[i].key === item[j].gubun._text){
                           let statusClass='', iconClass='', cnt = parseInt(item[j].incDec._text);
                           if(cnt > 0) iconClass = 'up';
                           else if(cnt <0) iconClass = 'down';
-                          if(cnt > 10) statusClass = "step1";
-                          if(cnt > 20) statusClass = "step2";
-                          if(cnt > 50) statusClass = "step3";
-                          if(cnt > 100) statusClass = "step4";
+                          if(cnt > 100) statusClass = "step1";
+                          if(cnt > 200) statusClass = "step2";
+                          if(cnt > 500) statusClass = "step3";
+                          if(cnt > 1000) statusClass = "step4";
                           excelData.push({
                             local:item[j].gubun._text,
                             total:numberWithCommas(item[j].defCnt._text),
@@ -273,7 +284,7 @@ function App() {
 
               
           };
-        fetchData();
+         fetchData();
         getNews();
         // kakaoshare();
         createKakaoButton();
@@ -306,13 +317,13 @@ function App() {
               <li>
                 <h2>{t('totalcases')}</h2>
                 <p className="total">{todayData.decide}</p>
-                <p className={
+                {/* <p className={
                   "today " +
                   (todayData.decide_ > 0? 'up' : '') +
                   (todayData.decide_ < 0? 'down' : '')
-                }>{numberWithCommas(Math.abs(todayData.decide_))}</p>
+                }>{numberWithCommas(Math.abs(todayData.decide_))}</p> */}
               </li>
-              <li>
+              {/* <li>
                 <h2>{t('recovered')}</h2>
                 <p className="total">{todayData.clear}</p>
                 <p className={
@@ -320,17 +331,17 @@ function App() {
                   (todayData.clear_ > 0? 'up' : '') +
                   (todayData.clear_ < 0? 'down' : '')
                 }>{numberWithCommas(Math.abs(todayData.clear_))}</p>
-              </li>
+              </li> */}
               <li>
                 <h2>{t('deaths')}</h2>
                 <p className="total">{todayData.death}</p>
-                <p className={
+                {/* <p className={
                   "today " +
                   (todayData.death_ > 0? 'up' : '') +
                   (todayData.death_ < 0? 'down' : '')
-                }>{numberWithCommas(Math.abs(todayData.death_))}</p>
+                }>{numberWithCommas(Math.abs(todayData.death_))}</p> */}
               </li>
-              <li>
+              {/* <li>
                 <h2>{t('exam')}</h2>
                 <p className="total">{todayData.exam}</p>
                 <p className={
@@ -338,11 +349,14 @@ function App() {
                   (todayData.exam_ > 0? 'up' : '') +
                   (todayData.exam_ < 0? 'down' : '')
                 }>{numberWithCommas(Math.abs(todayData.exam_))}</p>
-              </li>
+              </li> */}
             </ul>
           </article>
           <article className="card chart-card">
             <h2>{t('active cases graph')}</h2>
+            <div className="alert">
+              😱 기존 공공 API 구조가 변경되어 확진자 추세를 파악할 수 없습니다.
+            </div>
             <div className="chart">
               <canvas id="myChart" ref ={chartRef} width={400} height={400} />
             </div>

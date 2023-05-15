@@ -82,6 +82,8 @@ body{background:#f5f6f8}
 .btn-excel::before{background:#11a26a url(../images/download.png) no-repeat center/30px}
 .btn-kakao::before{background: url(../images/ico-kakao.png)}
 
+.alert{margin:0 10px; padding:20px 15px;font-size:11px;color:#333;background:#eee;border-radius:5px;}
+
 @media screen and (max-width:640px) {
     .wrapper{padding: 0 0 10px}
     .inner-wrapper{margin:0 10px}
